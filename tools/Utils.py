@@ -37,7 +37,7 @@ def random_str():
 #     password = pbkdf2_sha256.hash(psw)
 #     return password
 #
-#
+# #
 # def check_password(password: str, old: str):
 #     """
 #     密码校验

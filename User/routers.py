@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends
-from fastapi import Header
+from fastapi import Header, status
 from tools.exception import HTTPException
 
 from tools.responses import responses
 
 
 async def get_token_header(x_token: str = Header()):
-    print('--')
     if x_token != "fake-super-secret-token":
-        raise HTTPException(code=200, msg='token校验失败')
+        raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token校验失败')
     return 'arya'
 
 
@@ -29,8 +28,7 @@ async def login():
 
 
 @user_router.get('/get/', )
-async def user_get(de=Depends(get_token_header)):
-    print(de)
+async def user_get(user, ):
     return responses()
 
 

@@ -1,30 +1,30 @@
-from urllib.request import Request
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.requests import Request
+
+from tools.utils.decorator import singleton
 
 
-# 自定义异常返回
 class HTTPException(Exception):
+    """
+    主动抛出异常返回
+    """
+
     def __init__(self, code: int = 400, msg: str = '请求发生错误,请核对'):
         self.msg = msg
         self.code = code
 
 
-def register_exception(app: FastAPI):
-    @app.exception_handler(HTTPException)
-    async def _register_exception(request: Request, exc: HTTPException):
-        return JSONResponse(
-            status_code=exc.code,
-            content={
-                "msg": exc.msg,
-            }, )
+@singleton
+class FastAPIException:
 
+    def init_app(self, app: FastAPI):
+        app.add_exception_handler(RequestValidationError, handler=self._request_validation_error)
+        app.add_exception_handler(HTTPException, handler=self._register_exception)
 
-# 拦截参数校验异常
-def request_validation_error(app: FastAPI):
-    @app.exception_handler(RequestValidationError)
-    async def _request_validation_error(request: Request, exc: RequestValidationError):
+    @staticmethod
+    async def _request_validation_error(request, exc: RequestValidationError):
         data = exc.errors()
         print(data)
         msg_list = []
@@ -40,4 +40,12 @@ def request_validation_error(app: FastAPI):
         return JSONResponse(
             status_code=422,
             content=msg_list
+        )
+
+    @staticmethod
+    async def _register_exception(request: Request, exc: HTTPException):
+        print(request.url)
+        return JSONResponse(
+            status_code=exc.code,
+            content=exc.msg
         )

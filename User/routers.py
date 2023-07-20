@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends
 from fastapi import Header, status
 from tools.exception import HTTPException
 
-from tools.responses import responses
-
 
 async def get_token_header(x_token: str = Header()):
     if x_token != "fake-super-secret-token":
@@ -28,8 +26,9 @@ async def login():
 
 
 @user_router.get('/get/', )
-async def user_get(user, ):
-    return responses()
+async def user_get(user: str, ):
+    raise HTTPException()
+    # return responses()
 
 
 login_router.include_router(user_router)

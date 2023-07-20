@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 import User.routers
 from settings import DB_ORM_CONFIG
-from tools.exception import register_exception, request_validation_error
 from tortoise.contrib.fastapi import register_tortoise
+from tools.exception import FastAPIException
 
 # 创建app对象
 app = FastAPI()
@@ -12,8 +12,8 @@ app = FastAPI()
 app.include_router(User.routers.login_router)
 
 # 异常拦截
-register_exception(app)
-request_validation_error(app)
+FastAPIException().init_app(app=app)
+
 
 # 链接数据库
 register_tortoise(

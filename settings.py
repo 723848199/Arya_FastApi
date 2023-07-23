@@ -1,6 +1,6 @@
 import os
 import dotenv
-
+from tortoise.contrib.fastapi import register_tortoise
 
 # 读取.env文件数据
 dotenv.load_dotenv()
@@ -30,4 +30,10 @@ DB_ORM_CONFIG = {
 }
 
 
-
+def link_db(app):
+    register_tortoise(
+        app,
+        config=DB_ORM_CONFIG,
+        generate_schemas=True,
+        add_exception_handlers=False,
+    )

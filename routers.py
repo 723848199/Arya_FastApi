@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import FastAPI
+from User.routers import user_router
 
-from User.routers import login_router
 
-main_router = APIRouter(
-    responses={404: {"description": "Not found"}},
-)
-
-main_router.include_router(login_router)
+def main_router(app: FastAPI):
+    """
+    路由管理
+    """
+    app.include_router(user_router, prefix='/user', tags=['用户'])
+    app.api_route('/uu')

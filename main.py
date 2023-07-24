@@ -12,15 +12,14 @@ app = FastAPI(debug=True,
               )
 
 # 挂接子路由
-app.include_router(main_router)
-
+main_router(app=app)
 
 # 异常拦截
-FastAPIException().init_app(app=app)
+
+FastAPIException(app=app)
 
 # 链接数据库
-link_db(app)
-
+link_db(app=app)
 
 # 运行app
 if __name__ == '__main__':

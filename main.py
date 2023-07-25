@@ -15,7 +15,6 @@ app = FastAPI(debug=True,
 main_router(app=app)
 
 # 异常拦截
-
 FastAPIException(app=app)
 
 # 链接数据库

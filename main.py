@@ -15,10 +15,16 @@ app = FastAPI(debug=True,
 main_router(app=app)
 
 # 异常拦截
-FastAPIException(app=app)
+FastAPIException(app)
 
 # 链接数据库
 link_db(app=app)
+
+
+@app.get('/')
+async def main():
+    return {'msg': 'this is page'}
+
 
 # 运行app
 if __name__ == '__main__':

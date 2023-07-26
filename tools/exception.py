@@ -15,16 +15,14 @@ class HTTPException(Exception):
         self.code = code
 
 
-@singleton
 class FastAPIException:
+    """
+    自定义异常捕获
+    """
+
     def __init__(self, app: FastAPI):
         app.add_exception_handler(RequestValidationError, handler=self._request_validation_error)
         app.add_exception_handler(HTTPException, handler=self._register_exception)
-
-    # def init_app(self, app: FastAPI):
-    #     print(id(self))
-    #     app.add_exception_handler(RequestValidationError, handler=self._request_validation_error)
-    #     app.add_exception_handler(HTTPException, handler=self._register_exception)
 
     @staticmethod
     async def _request_validation_error(request, exc: RequestValidationError):

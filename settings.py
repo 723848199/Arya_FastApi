@@ -4,11 +4,11 @@ import dotenv
 from fastapi import FastAPI
 from tortoise.contrib.fastapi import register_tortoise
 
-# JWT令牌随机密钥  生成方式 openssl rand -hex 32
+# JWT令牌随机密钥,用于对jwt令牌进行签名  生成方式 openssl rand -hex 32
 SECRET_KEY = "b8377f770ab26b2bc23780e82909324d0376e60953625ba99933dac7f4bfd66a"
 # JWT 令牌签名算法的变量
 ALGORITHM = "HS256"
-# 令牌过期时间
+# 令牌过期时间(单位:分钟)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 

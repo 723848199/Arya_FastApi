@@ -1,5 +1,6 @@
 from tortoise import fields
 from tortoise.models import Model
+from User.enums import UserType
 
 
 # from tortoise.contrib.pydantic import pydantic_model_creator
@@ -19,8 +20,8 @@ class Users(Model):
     # sex = fields.CharField(max_length=10, null=True, description='性别')
     #
     # group: fields.ForeignKeyRelation[UserGroup] = fields.ForeignKeyField(model_name='UserGroup', related_name='group')
-    # is_admin = fields.BooleanField(default=False, description='是否是超级管理员')
-    # is_delete = fields.BooleanField(default=False, description='是否删除')
+    type = fields.CharEnumField(enum_type=UserType, default=UserType.user, description='用户类型', max_length=20)
+    # status = fields.BooleanField(default=False, description='用户状态')
     # created_time = fields.DatetimeField(auto_now_add=True, description='创建时间')
     # update_time = fields.DatetimeField(auto_now=True, description='最后需改时间')
 

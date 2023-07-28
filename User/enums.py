@@ -15,3 +15,12 @@ class UserStatus(Enum):
     """
     normal = '正常'
     delete = '已删除'
+
+
+class UserSex(Enum):
+    """
+    用户性别
+    """
+    man: str = '男'
+    woman: str = '女'
+    secrecy: str = '保密'

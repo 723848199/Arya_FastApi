@@ -36,6 +36,8 @@ class FastAPIException:
             match details['type']:
                 case 'missing':
                     msg_list.append(f'{par_type} 中 {par_name} 参数不能为空')
+                case 'string_too_short':
+                    msg_list.append(f'{par_type} 中 {par_name} 长度不符合要求')
                 case '-':
                     msg_list.append('未知错误,代核对')
         return JSONResponse(

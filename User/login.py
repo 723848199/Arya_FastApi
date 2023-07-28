@@ -1,17 +1,16 @@
-from fastapi.openapi.models import Response
-from fastapi import status, APIRouter
-from User.auth import check_user, create_access_token
+from fastapi import status, APIRouter, Form, Body, Response
+from User.auth import check_user, create_access_token, get_password_hash
 from User.models import Token, Users, UserType
+from User.serializes import UserIn, UserOut
 from tools.exception import HTTPException
 
 # 登录路由--不需要验证token
 login_router = APIRouter(
-    # dependencies=[Depends(get_token_header)],
     responses={404: {"description": "Not found"}},
 )
 
 
-@login_router.post('', summary='用户登录')
+@login_router.post('/login', summary='用户登录', response_model='')
 async def login(username: str, password: str, response: Response):
     user = await check_user(username, password)
     if not user:
@@ -24,16 +23,10 @@ async def login(username: str, password: str, response: Response):
     return access_token
 
 
-@login_router.post('/adduser', summary='添加用户')
-async def login(username: str, password: str, response: Response):
-    user = await Users.create(account=username, password=password, type=UserType.admin)
-    return user
-
-
-@login_router.post('/adduser01', summary='添加用户')
-async def login(user_id: int = 1):
-    user = await Users.filter(type=UserType.user).first()
-    print(user.type)
-    if user.type == UserType.user:
-        print('----')
+@login_router.post('/register', summary='注册用户', response_model=UserOut)
+async def register(user: UserIn = Body()):
+    user.password = get_password_hash(user.password)
+    if await Users.filter(account=user.account).first():
+        raise HTTPException(msg='账户已存在')
+    user = await Users.create(**user.model_dump())
     return user

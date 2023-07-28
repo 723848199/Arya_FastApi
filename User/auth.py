@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Union, Optional
-
-from fastapi import Header, Response, Cookie, Depends
+from typing import Union
+from fastapi import Response, Cookie, Depends
 from jose import jwt
 from passlib.context import CryptContext
 from pydantic import ValidationError
 from starlette import status
-
 from User.enums import UserType
 from User.models import Users, Token
 from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -43,7 +41,6 @@ def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MIN
     :return: token
     """
     to_encode = data.copy()
-
     expire = datetime.utcnow() + timedelta(minutes=expires_delta)
     # 添加失效时间
     to_encode.update({"exp": expire})
@@ -53,7 +50,7 @@ def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MIN
     return encoded_jwt
 
 
-async def check_jwt_token(token: str = Cookie(default='-1'), response: Response = None) -> Union[Users, None]:
+async def check_jwt_token(token: str = Cookie(default=''), response: Response = None) -> Union[Users, None]:
     """
     验证token
     :param response:
@@ -61,13 +58,14 @@ async def check_jwt_token(token: str = Cookie(default='-1'), response: Response 
     :return: 用户
     """
     try:
+
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         username: str = payload.get('sub')
         user = await Users.filter(account=username).first()
         if datetime.utcnow() + timedelta(minutes=10) > datetime.utcfromtimestamp(payload.get('exp')):
             # 过期时间小于10分钟,刷新token
             access_token = create_access_token(data={'sub': user.account})
-            response.headers['token'] = access_token
+            # response.headers['token'] = access_token
             response.set_cookie(key='token', value=access_token)
             await Token.update_or_create(defaults={'token': access_token}, user=user)
         return user
@@ -75,7 +73,7 @@ async def check_jwt_token(token: str = Cookie(default='-1'), response: Response 
         raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证失败')
 
 
-async def check_user_admin(user: Users = Depends(check_jwt_token)):
+async def check_admin_token(user: Users = Depends(check_jwt_token)):
     """
     验证用户是否为管理员
     :param user:

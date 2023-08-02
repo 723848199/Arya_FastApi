@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from starlette.requests import Request
 from tools.utils.decorator import singleton
 
@@ -23,6 +23,7 @@ class FastAPIException:
     def __init__(self, app: FastAPI):
         app.add_exception_handler(RequestValidationError, handler=self._request_validation_error)
         app.add_exception_handler(HTTPException, handler=self._register_exception)
+        app.add_exception_handler(ResponseValidationError, handler=self._response_validation_error)
 
     @staticmethod
     async def _request_validation_error(request, exc: RequestValidationError):
@@ -51,4 +52,14 @@ class FastAPIException:
         return JSONResponse(
             status_code=exc.code,
             content=exc.msg
+        )
+
+    @staticmethod
+    async def _response_validation_error(request, exc: ResponseValidationError):
+        # print(exc.errors())
+        for i in exc.errors():
+            print(i)
+        return JSONResponse(
+            status_code=422,
+            content='验证错误'
         )

@@ -2,6 +2,7 @@ import os
 from functools import cache
 import dotenv
 from fastapi import FastAPI
+from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 # JWT令牌随机密钥,用于对jwt令牌进行签名  生成方式 openssl rand -hex 32
@@ -48,9 +49,11 @@ setting = Setting()
 
 
 def link_db(app: FastAPI):
+
     register_tortoise(
         app,
         config=setting.db_rom_config,
         generate_schemas=True,
-        add_exception_handlers=False,
-    )
+        add_exception_handlers=False, )
+    # Tortoise.init_models(['User.models'], 'arya')
+

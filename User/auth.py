@@ -5,7 +5,7 @@ from jose import jwt
 from passlib.context import CryptContext
 from pydantic import ValidationError
 from starlette import status
-from User.enums import UserType
+from User.enums import UserType, UserStatus
 from User.models import Users, Token
 from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from tools.exception import HTTPException
@@ -61,10 +61,12 @@ async def check_jwt_token(token: str = Cookie(default=''), response: Response = 
 
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         username: str = payload.get('sub')
-        user = await Users.filter(account=username).first()
+        user = await Users.get_or_none(username=username)
+        if not user:
+            raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证成功,用户查找失败')
         if datetime.utcnow() + timedelta(minutes=10) > datetime.utcfromtimestamp(payload.get('exp')):
             # 过期时间小于10分钟,刷新token
-            access_token = create_access_token(data={'sub': user.account})
+            access_token = create_access_token(data={'sub': user.username})
             # response.headers['token'] = access_token
             response.set_cookie(key='token', value=access_token)
             await Token.update_or_create(defaults={'token': access_token}, user=user)
@@ -92,9 +94,12 @@ async def check_user(username, password) -> Union[Users, bool]:
     :param password: 密码
     :return:
     """
-    user = await Users.filter(account=username).first()
+    user = await Users.filter(username=username).first()
     if not user:
         return False
     if not verify_password(password, user.password):
         return False
+    print(user.is_delete, user.status, UserStatus.normal.value)
+    if user.is_delete or user.status is not UserStatus.normal:
+        raise HTTPException(msg='用户状态异常')
     return user

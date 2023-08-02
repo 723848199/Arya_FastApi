@@ -24,3 +24,15 @@ class UserSex(Enum):
     man: str = '男'
     woman: str = '女'
     secrecy: str = '保密'
+
+
+class LoginTypeEnum(Enum):
+    """
+    登录类型
+    1,账号密码登录
+    2,手机号登录
+    3,邮箱登录
+    """
+    username: int = 1
+    mobile_phone: int = 2
+    email: int = 3

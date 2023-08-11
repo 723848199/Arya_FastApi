@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from starlette.requests import Request
-from tools.utils.decorator import singleton
+
+
+# from tools.utils.decorator import singleton
 
 
 class HTTPException(Exception):
@@ -27,6 +29,7 @@ class FastAPIException:
 
     @staticmethod
     async def _request_validation_error(request, exc: RequestValidationError):
+        print(request)
         data = exc.errors()
         print(data)
         msg_list = []
@@ -56,7 +59,7 @@ class FastAPIException:
 
     @staticmethod
     async def _response_validation_error(request, exc: ResponseValidationError):
-        # print(exc.errors())
+        print(request)
         for i in exc.errors():
             print(i)
         return JSONResponse(

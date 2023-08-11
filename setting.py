@@ -2,6 +2,7 @@ import os
 from functools import cache
 import dotenv
 from fastapi import FastAPI
+from passlib.context import CryptContext
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
@@ -12,10 +13,15 @@ ALGORITHM = "HS256"
 # 令牌过期时间(单位:分钟)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# 创建对象,进行哈希和校验密码
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @cache
 class Setting:
+
     def __init__(self):
+        self.title = 'Arya_api'
+        self.summary = 'api接口完善'
         # 读取.env文件数据
         dotenv.load_dotenv()
 
@@ -35,7 +41,7 @@ class Setting:
                 },
             },
             "apps": {
-                "User": {"models": ["User.models"], "default_connection": "pgsql"},
+                "User": {"models": ["app.user.models"], "default_connection": "pgsql"},
                 # "db2": {"models": ["models.db2"], "default_connection": "db2"},
                 # "db3": {"models": ["models.db3"], "default_connection": "db3"}
             },
@@ -49,11 +55,8 @@ setting = Setting()
 
 
 def link_db(app: FastAPI):
-
     register_tortoise(
         app,
         config=setting.db_rom_config,
         generate_schemas=True,
         add_exception_handlers=False, )
-    # Tortoise.init_models(['User.models'], 'arya')
-

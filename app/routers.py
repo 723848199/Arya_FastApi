@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-
-from User.routers import user_routers
+from app.user.routers import user_router
 
 
 def main_router(app: FastAPI):
     """
     路由管理
     """
-    user_routers(app=app)
+    # 用户
+    user_router(app=app)

@@ -1,17 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Union
-from fastapi import Response, Cookie, Depends
+
+from fastapi import Cookie, Response, Depends
 from jose import jwt
-from passlib.context import CryptContext
 from pydantic import ValidationError
 from starlette import status
-from User.enums import UserType, UserStatus
-from User.models import Users, Token
-from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from tools.exception import HTTPException
 
-# 创建对象,进行哈希和校验密码
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from app.user.models import User, Token
+from common.exception import HTTPException
+from setting import pwd_context, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
 
 
 def verify_password(plain_password, hashed_password):
@@ -33,6 +30,24 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+async def check_user(account, password) -> Union[User, bool]:
+    """
+    校验用户密码
+    :param account: 账号
+    :param password: 密码
+    :return:
+    """
+    user = await User.filter(account=account, is_delete=False).first()
+    if not user:
+        return False
+    if not verify_password(password, user.password):
+        return False
+
+    # if user.is_delete or user.status is not UserStatus.normal:
+    #     raise HTTPException(msg='用户状态异常')
+    return user
+
+
 def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MINUTES):
     """
     访问令牌,创建token
@@ -50,24 +65,25 @@ def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MIN
     return encoded_jwt
 
 
-async def check_jwt_token(token: str = Cookie(default=''), response: Response = None) -> Union[Users, None]:
+async def check_jwt_token(token: str = Cookie(default='')) -> Union[User, None]:
     """
     验证token
-    :param response:
     :param token:
     :return: 用户
     """
+    print(token)
     try:
-
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-        username: str = payload.get('sub')
-        user = await Users.get_or_none(username=username)
+        account: str = payload.get('sub')
+        print(account)
+        user = await User.get_or_none(account=account)
         if not user:
             raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证成功,用户查找失败')
         if datetime.utcnow() + timedelta(minutes=10) > datetime.utcfromtimestamp(payload.get('exp')):
             # 过期时间小于10分钟,刷新token
             access_token = create_access_token(data={'sub': user.username})
             # response.headers['token'] = access_token
+            response = Response()
             response.set_cookie(key='token', value=access_token)
             await Token.update_or_create(defaults={'token': access_token}, user=user)
         return user
@@ -75,31 +91,13 @@ async def check_jwt_token(token: str = Cookie(default=''), response: Response = 
         raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证失败')
 
 
-async def check_admin_token(user: Users = Depends(check_jwt_token)):
+async def check_admin_token(user: User = Depends(check_jwt_token)):
     """
     验证用户是否为管理员
     :param user:
     :return:
     """
-    if user.type == UserType.admin:
-        return user
-    else:
-        raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证失败,用户非管理员')
-
-
-async def check_user(username, password) -> Union[Users, bool]:
-    """
-    校验用户密码
-    :param username: 账号
-    :param password: 密码
-    :return:
-    """
-    user = await Users.filter(username=username).first()
-    if not user:
-        return False
-    if not verify_password(password, user.password):
-        return False
-    print(user.is_delete, user.status, UserStatus.normal.value)
-    if user.is_delete or user.status is not UserStatus.normal:
-        raise HTTPException(msg='用户状态异常')
-    return user
+    # if user.type == UserType.admin:
+    #     return user
+    # else:
+    #     raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证失败,用户非管理员')

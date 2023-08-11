@@ -1,9 +1,10 @@
 from typing import List, Union
 from fastapi import Depends, status, Path, Response, APIRouter
-from User.auth import check_jwt_token
-from User.models import Users
-from User.serializes import UserIn
-from tools.exception import HTTPException
+
+from app.schemas import UserOut
+from app.user.auth import check_jwt_token
+from app.user.models import User
+from common.exception import HTTPException
 
 # 用户路由--需要验证token-登录后可以访问
 user_router = APIRouter(
@@ -18,23 +19,20 @@ async def user_logout(response: Response):
     return '操作成功'
 
 
-@user_router.get('/me', summary='获取个人信息', response_model=UserIn)
-async def user_get(user: Users = Depends(check_jwt_token)):
-    print('------')
-    return user
+@user_router.get('/me', summary='获取个人信息', response_model=UserOut)
+async def user_get(user: User = Depends(check_jwt_token)):
+    return await UserOut.from_tortoise_orm(user)
 
 
-@user_router.get('/all', summary='获取所有用户信息', response_model=List[UserIn])
+@user_router.get('/all', summary='获取所有用户信息', response_model=List[UserOut])
 async def user_all():
-    users = await Users.all()
-    # return await UserIn.from_queryset(users)
-    return users
+    return await UserOut.from_queryset(User.filter(is_delete=False))
 
 
 @user_router.get('/{user_id}', summary='获取指定用户信息',
-                 status_code=status.HTTP_200_OK, response_model=Union[UserIn, None])
+                 status_code=status.HTTP_200_OK, response_model=Union[UserOut])
 async def user_get(user_id: int = Path(default=..., description='用户id', )):
-    user = await Users.get_or_none(id=user_id)
+    user = await User.get_or_none(id=user_id)
     if not user:
         raise HTTPException(msg='请求的数据不存在')
-    return user
+    return await UserOut.from_tortoise_orm(user)

@@ -18,6 +18,7 @@
     * `routers.py` --总路由管理
     * `schemas.py` --总序列化模型
 * `common` --公共函数目录
+* `notebook` --笔记目录,和项目无关
 * `test` --单元测试目录
 * `main.py` --项目入口
 * `setting.py` --项目配置文件

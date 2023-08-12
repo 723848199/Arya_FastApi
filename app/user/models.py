@@ -19,7 +19,7 @@ class User(Abstract):
             force_update: bool = False,
     ) -> None:
         """
-        重新save方法,保存时对密码进行加密
+        重写save方法,保存时对密码进行加密
         """
         if force_create or 'password' in update_fields:
             self.password = pwd_context.hash(self.password)

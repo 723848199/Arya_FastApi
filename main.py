@@ -1,6 +1,5 @@
 import uvicorn
 from fastapi import FastAPI
-
 from app.routers import main_router
 from common.exception import FastAPIException
 from setting import link_db, setting
@@ -9,7 +8,6 @@ app = FastAPI(
     title=setting.title,
     summary=setting.summary
 )
-
 
 # 挂接子路由
 main_router(app=app)

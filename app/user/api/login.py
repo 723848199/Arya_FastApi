@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Body, Depends
-from fastapi import Response
+from fastapi import APIRouter, Body, Depends, Response
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import JSONResponse
 
 from app.schemas import Login, UserOut
-from app.user.auth import create_access_token, verify_password
+from app.user.auth import verify_password, create_access_token
 from app.user.models import User, Token
 from common.exception import HTTPException
 
@@ -37,5 +35,3 @@ async def login(user_data: OAuth2PasswordRequestForm = Depends()):
             raise HTTPException(msg='用户名或密码错误')
     else:
         raise HTTPException(msg='账号不存在或已注销')
-
-

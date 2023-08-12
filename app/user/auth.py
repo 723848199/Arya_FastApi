@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Union
-
-from fastapi import Cookie, Response, Depends
+from fastapi import Cookie, Response, Depends, status
 from jose import jwt
 from pydantic import ValidationError
-from starlette import status
 
 from app.user.models import User, Token
 from common.exception import HTTPException

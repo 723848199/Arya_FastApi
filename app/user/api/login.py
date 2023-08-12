@@ -5,6 +5,7 @@ from app.schemas import Login, UserOut
 from app.user.auth import verify_password, create_access_token
 from app.user.models import User, Token
 from common.exception import HTTPException
+from setting import pwd_context
 
 # 登录路由--不需要验证token
 login_router = APIRouter(
@@ -16,6 +17,7 @@ login_router = APIRouter(
 async def register(user: Login = Body()):
     if await User.get_or_none(account=user.account):
         raise HTTPException(msg=f'{user.account} 用户已存在')
+    user.password = pwd_context.hash(user.password)
     user_obj = await User.create(**user.model_dump())
     return await UserOut.from_tortoise_orm(user_obj)
 

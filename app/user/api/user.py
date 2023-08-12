@@ -1,10 +1,11 @@
 from typing import List, Union
-from fastapi import Depends, status, Path, Response, APIRouter
+from fastapi import Depends, status, Path, Response, APIRouter, Body
 
 from app.schemas import UserOut
 from app.user.auth import check_jwt_token
 from app.user.models import User
 from common.exception import HTTPException
+from setting import pwd_context
 
 # 用户路由--需要验证token-登录后可以访问
 user_router = APIRouter(
@@ -36,3 +37,10 @@ async def user_get(user_id: int = Path(default=..., description='用户id', )):
     if not user:
         raise HTTPException(msg='请求的数据不存在')
     return await UserOut.from_tortoise_orm(user)
+
+
+@user_router.put('/me', summary='重置密码')
+async def reset_password(user: User = Depends(check_jwt_token), new_password: str = Body()):
+    new_password = pwd_context.hash(new_password)
+    await User.filter(pk=user.pk).update(password=new_password)
+    return '操作成功'

@@ -11,20 +11,6 @@ class User(Abstract):
 
     tokens: fields.ReverseRelation['Token']
 
-    async def save(
-            self,
-            using_db: Optional[BaseDBAsyncClient] = None,
-            update_fields: Optional[Iterable[str]] = None,
-            force_create: bool = False,
-            force_update: bool = False,
-    ) -> None:
-        """
-        重写save方法,保存时对密码进行加密
-        """
-        if force_create or 'password' in update_fields:
-            self.password = pwd_context.hash(self.password)
-        await super(User, self).save(using_db, update_fields, force_create, force_update)
-
     class Meta:
         table = 'users'
 
@@ -36,3 +22,22 @@ class Token(Model):
     user: fields.ForeignKeyNullableRelation[User] = fields.ForeignKeyField('User.User', related_name='tokens',
                                                                            null=True)
     token = fields.CharField(max_length=255)
+
+
+from enum import IntEnum
+
+
+class Gender(IntEnum):
+    man = 1
+    woman = 2
+    secrecy = 0
+
+
+class UserModel(Abstract):
+    """
+    ipynb测试模型
+    """
+    account = fields.CharField(max_length=50, index=True, description='账号', null=True)
+    password = fields.CharField(max_length=100, index=True, description='密码')
+    gender = fields.IntEnumField(enum_type=Gender, defalut=Gender.secrecy.value, )
+    integral = fields.DecimalField(max_digits=10, decimal_places=5, null=True, default=None)

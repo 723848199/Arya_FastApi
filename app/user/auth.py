@@ -69,11 +69,9 @@ async def check_jwt_token(token: str = Cookie(default='')) -> Union[User, None]:
     :param token:
     :return: 用户
     """
-    print(token)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         account: str = payload.get('sub')
-        print(account)
         user = await User.get_or_none(account=account)
         if not user:
             raise HTTPException(code=status.HTTP_401_UNAUTHORIZED, msg='token验证成功,用户查找失败')

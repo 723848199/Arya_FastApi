@@ -25,6 +25,7 @@ async def user_get(user: User = Depends(check_jwt_token)):
     return await UserOut.from_tortoise_orm(user)
 
 
+
 @user_router.get('/all', summary='获取所有用户信息', response_model=List[UserOut])
 async def user_all():
     return await UserOut.from_queryset(User.filter(is_delete=False))

@@ -8,6 +8,7 @@ class Login(BaseModel):
     account: str
     password: str
     username: str = None
+    demo :str = None
 
     class Config:
         from_attributes = True

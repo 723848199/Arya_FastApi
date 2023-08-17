@@ -33,8 +33,8 @@ class Setting:
                     'engine': 'tortoise.backends.asyncpg',
                     "credentials": {
                         'host': os.getenv('BASE_HOST', '127.0.0.1'),
-                        'user': os.getenv('BASE_USER', 'arya'),
-                        'password': os.getenv('BASE_PASSWORD', '12345678'),
+                        'user': os.getenv('BASE_USER', 'postgres'),
+                        'password': os.getenv('BASE_PASSWORD', '15988'),
                         'port': os.getenv('BASE_PORT', 5432),
                         'database': os.getenv('BASE_DB', 'postgres'),
                     }
